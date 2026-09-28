@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { GradeCurriculum } from '../types/curriculum';
 import { InteractiveVectorDiagram } from './InteractiveVectorDiagram';
 import {
@@ -28,9 +28,18 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
   onOpenLightbox,
   onOpenUploadModal,
 }) => {
-  // Always default to interactive vector diagram so content is IMMEDIATELY visible without requiring any file upload!
-  const [viewMode, setViewMode] = useState<'image' | 'interactive'>('interactive');
+  // If original PNG is loaded, default to image view; otherwise start on interactive diagram
+  const [viewMode, setViewMode] = useState<'image' | 'interactive'>(
+    loadedImageSrc ? 'image' : 'interactive'
+  );
   const [lessonFilter, setLessonFilter] = useState<'all' | '기개발' | '신규' | '흡수'>('all');
+
+  // Automatically switch to image view when user connects an image
+  useEffect(() => {
+    if (loadedImageSrc) {
+      setViewMode('image');
+    }
+  }, [loadedImageSrc]);
 
   const filteredLessons = curriculum.lessons?.filter(l => {
     if (lessonFilter === 'all') return true;
@@ -115,7 +124,7 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
             }`}
           >
             <FileImage className="w-4 h-4" />
-            <span>고화질 인포그래픽 뷰어</span>
+            <span>원본 PNG 스캔 뷰어</span>
             {loadedImageSrc && (
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             )}
@@ -123,13 +132,15 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={onOpenLightbox}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-colors cursor-pointer"
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-            <span>전체화면 돋보기</span>
-          </button>
+          {loadedImageSrc && (
+            <button
+              onClick={onOpenLightbox}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl transition-colors cursor-pointer"
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+              <span>전체화면 돋보기</span>
+            </button>
+          )}
           <button
             onClick={onOpenUploadModal}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors cursor-pointer"
@@ -140,7 +151,7 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
         </div>
       </div>
 
-      {/* Mode 1: Interactive Vector Diagram View (Always 100% visible, fully rich) */}
+      {/* Mode 1: Interactive Vector Diagram View */}
       {viewMode === 'interactive' && (
         <InteractiveVectorDiagram
           curriculum={curriculum}
@@ -149,7 +160,7 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
         />
       )}
 
-      {/* Mode 2: Graphic Viewer View */}
+      {/* Mode 2: Original PNG Scanner Viewer View (Matches user screenshot) */}
       {viewMode === 'image' && (
         <div className="space-y-4">
           <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-xl border border-slate-800 text-white">
@@ -157,21 +168,23 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                 <h3 className="font-bold text-sm sm:text-base">
-                  {curriculum.grade} 인공지능 윤리교육 흐름도 인포그래픽
+                  {curriculum.grade} 인공지능 윤리교육 흐름도 원본 인포그래픽{' '}
+                  <span className="text-xs text-slate-400 font-mono font-normal">
+                    ({curriculum.imageFileName})
+                  </span>
                 </h3>
-                <span className="text-xs text-slate-400 font-mono">
-                  ({curriculum.imageFileName})
-                </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={onOpenLightbox}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl transition-colors shadow-sm cursor-pointer"
-                >
-                  <ZoomIn className="w-3.5 h-3.5" />
-                  <span>클릭하여 확대 / 전체화면</span>
-                </button>
+                {loadedImageSrc && (
+                  <button
+                    onClick={onOpenLightbox}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium rounded-xl transition-colors shadow-sm cursor-pointer"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                    <span>클릭하여 확대 / 전체화면</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -184,7 +197,7 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
                   <img
                     src={loadedImageSrc}
                     alt={`${curriculum.grade} 인포그래픽 원본`}
-                    className="w-full max-h-[800px] object-contain transition-transform duration-300 group-hover:scale-[1.008]"
+                    className="w-full max-h-[850px] object-contain transition-transform duration-300 group-hover:scale-[1.008]"
                   />
                   <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <span className="bg-slate-950/80 text-white text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-sm border border-slate-700 flex items-center gap-2 shadow-2xl">
@@ -194,24 +207,29 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
                   </div>
                 </div>
               ) : (
-                /* When no custom external file is uploaded, render the FULL visual diagram right here! NEVER show an empty box! */
-                <div className="w-full p-2 sm:p-4 text-slate-900">
-                  <div className="mb-3 px-3 py-2 bg-indigo-950/80 border border-indigo-700/60 rounded-xl text-xs text-indigo-200 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      ✨ 고해상도 벡터 인포그래픽으로 렌더링되어 별도의 파일 첨부 없이도 선명하게 열람하실 수 있습니다.
-                    </span>
+                <div className="text-center p-8 max-w-md">
+                  <FileImage className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                  <h4 className="font-bold text-white text-base mb-1">
+                    {curriculum.imageFileName} 원본 파일 연결
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                    소장하고 계신 원본 PNG 파일을 등록하시면 이곳에 원본 스캔본이 고화질로 바로 표시됩니다.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={onOpenUploadModal}
-                      className="text-[11px] underline text-indigo-300 hover:text-white"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2 cursor-pointer"
                     >
-                      사용자 파일 교체
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>파일 연결하기</span>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('interactive')}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 cursor-pointer"
+                    >
+                      웹 다이어그램 보기
                     </button>
                   </div>
-                  <InteractiveVectorDiagram
-                    curriculum={curriculum}
-                    onOpenLightbox={onOpenLightbox}
-                    hasUploadedImage={false}
-                  />
                 </div>
               )}
             </div>

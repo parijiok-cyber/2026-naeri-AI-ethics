@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { curriculumData, OVERVIEW_IMAGE_NAME } from '../data/curriculumData';
 import { OverviewPoster } from './OverviewPoster';
 import { ZoomIn, ArrowRight, FileImage, Sparkles, CheckCircle2, Upload, Layers } from 'lucide-react';
@@ -16,7 +16,15 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
   onSelectGrade,
   onOpenUploadModal,
 }) => {
-  const [viewTab, setViewTab] = useState<'poster' | 'image'>('poster');
+  const [viewTab, setViewTab] = useState<'poster' | 'image'>(
+    overviewImageSrc ? 'image' : 'poster'
+  );
+
+  useEffect(() => {
+    if (overviewImageSrc) {
+      setViewTab('image');
+    }
+  }, [overviewImageSrc]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -147,19 +155,29 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="w-full p-2 sm:p-4 text-slate-900">
-                  <div className="mb-3 px-3 py-2 bg-indigo-950/80 border border-indigo-700/60 rounded-xl text-xs text-indigo-200 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      ✨ 고해상도 벡터 인포그래픽 개요도를 표시 중입니다.
-                    </span>
+                <div className="text-center p-8 max-w-md">
+                  <FileImage className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                  <h4 className="font-bold text-white text-base mb-1">
+                    {OVERVIEW_IMAGE_NAME} 원본 파일 연결
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                    소장하고 계신 원본 PNG 파일을 등록하시면 이곳에 원본 스캔본이 고화질로 바로 표시됩니다.
+                  </p>
+                  <div className="flex items-center justify-center gap-3">
                     <button
                       onClick={onOpenUploadModal}
-                      className="text-[11px] underline text-indigo-300 hover:text-white"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2 cursor-pointer"
                     >
-                      사용자 파일 교체
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>파일 연결하기</span>
+                    </button>
+                    <button
+                      onClick={() => setViewTab('poster')}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl border border-slate-700 cursor-pointer"
+                    >
+                      개요 다이어그램 보기
                     </button>
                   </div>
-                  <OverviewPoster onSelectGrade={onSelectGrade} />
                 </div>
               )}
             </div>
