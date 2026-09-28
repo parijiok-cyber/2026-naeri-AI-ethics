@@ -1,0 +1,6 @@
+{
+  "name": "내리숲초등학교 인공지능 윤리교육 여정",
+  "description": "내리숲초등학교 연구학교 인공지능(AI) 윤리교육 학년별 교육과정 인포그래픽과 마무리 여정 로드맵 포털",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
