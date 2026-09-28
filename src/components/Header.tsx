@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="원본 인포그래픽 파일 연결 관리"
           >
             <FileImage className="w-3.5 h-3.5" />
-            <span>원본 PNG</span>
+            <span>원본 이미지</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                 connectedCount === 8
@@ -94,7 +94,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'bg-indigo-600 text-white'
               }`}
             >
-              {connectedCount}/8
+              {connectedCount === 8 ? '8종 준비완료' : `${connectedCount}/8`}
             </span>
           </button>
 

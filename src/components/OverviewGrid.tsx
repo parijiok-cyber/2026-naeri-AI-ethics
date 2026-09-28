@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { curriculumData, OVERVIEW_IMAGE_NAME } from '../data/curriculumData';
-import { ZoomIn, ArrowRight, FileImage, Sparkles, CheckCircle2, Upload } from 'lucide-react';
+import { OverviewPoster } from './OverviewPoster';
+import { ZoomIn, ArrowRight, FileImage, Sparkles, CheckCircle2, Upload, Layers } from 'lucide-react';
 
 interface OverviewGridProps {
   overviewImageSrc: string | null;
@@ -15,6 +16,8 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
   onSelectGrade,
   onOpenUploadModal,
 }) => {
+  const [viewTab, setViewTab] = useState<'poster' | 'image'>(overviewImageSrc ? 'image' : 'poster');
+
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* Top Banner */}
@@ -50,74 +53,120 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
         </div>
       </div>
 
-      {/* Overview 1: Image Section */}
-      <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
-              📊 전체 교육과정 요약 개요도 ({OVERVIEW_IMAGE_NAME})
-            </span>
+      {/* Main Infographic Display Box */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setViewTab('poster')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                viewTab === 'poster'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-indigo-600 hover:bg-indigo-50'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>개요 인포그래픽 다이어그램</span>
+            </button>
+            <button
+              onClick={() => setViewTab('image')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                viewTab === 'image'
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <FileImage className="w-4 h-4" />
+              <span>원본 PNG 스캔 뷰어</span>
+              {overviewImageSrc && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+              )}
+            </button>
           </div>
 
           <div className="flex items-center gap-2">
-            {overviewImageSrc ? (
+            {overviewImageSrc && (
               <button
                 onClick={onOpenLightbox}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold rounded-xl border border-indigo-200 transition-colors"
               >
                 <ZoomIn className="w-3.5 h-3.5" />
-                <span>클릭하여 확대 보기</span>
-              </button>
-            ) : (
-              <button
-                onClick={onOpenUploadModal}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>{OVERVIEW_IMAGE_NAME} 등록하기</span>
+                <span>전체화면 확대</span>
               </button>
             )}
+            <button
+              onClick={onOpenUploadModal}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors"
+              title="파일 관리"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              <span>파일 관리</span>
+            </button>
           </div>
         </div>
 
-        {/* High-res Image or Interactive Fallback */}
-        <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 shadow-inner flex items-center justify-center min-h-[380px] p-2 relative group">
-          {overviewImageSrc ? (
-            <div
-              onClick={onOpenLightbox}
-              className="cursor-zoom-in relative w-full flex items-center justify-center"
-            >
-              <img
-                src={overviewImageSrc}
-                alt="유치원부터 6학년까지 인공지능 윤리 프로젝트 개요"
-                className="w-full max-h-[750px] object-contain transition-transform duration-300 group-hover:scale-[1.008]"
-              />
-              <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="bg-slate-950/80 text-white text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-sm border border-slate-700 flex items-center gap-2 shadow-2xl">
-                  <ZoomIn className="w-4 h-4 text-indigo-400" />
-                  클릭하여 고화질 확대 뷰어로 보기
-                </span>
-              </div>
+        {/* Tab 1: Vector Poster (Always fully ready, no upload needed!) */}
+        {viewTab === 'poster' && (
+          <OverviewPoster onSelectGrade={onSelectGrade} />
+        )}
+
+        {/* Tab 2: Original PNG Image Viewer */}
+        {viewTab === 'image' && (
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-200 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+              <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+                📊 전체 교육과정 요약 개요도 ({OVERVIEW_IMAGE_NAME})
+              </span>
+              {overviewImageSrc && (
+                <button
+                  onClick={onOpenLightbox}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-colors shadow-sm"
+                >
+                  <ZoomIn className="w-3.5 h-3.5" />
+                  <span>고화질 돋보기 확대</span>
+                </button>
+              )}
             </div>
-          ) : (
-            <div className="text-center p-8 max-w-md">
-              <FileImage className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-              <h4 className="font-bold text-white text-base mb-1">
-                {OVERVIEW_IMAGE_NAME} 파일 연결 대기 중
-              </h4>
-              <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                `{OVERVIEW_IMAGE_NAME}` 원본 파일이 등록되면 원본 인쇄용 인포그래픽을 고해상도로 열람할 수 있습니다.
-              </p>
-              <button
-                onClick={onOpenUploadModal}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                <span>파일 업로드 및 연결</span>
-              </button>
+
+            <div className="rounded-2xl overflow-hidden border border-slate-200 bg-slate-950 shadow-inner flex items-center justify-center min-h-[380px] p-2 relative group">
+              {overviewImageSrc ? (
+                <div
+                  onClick={onOpenLightbox}
+                  className="cursor-zoom-in relative w-full flex items-center justify-center"
+                >
+                  <img
+                    src={overviewImageSrc}
+                    alt="유치원부터 6학년까지 인공지능 윤리 프로젝트 개요"
+                    className="w-full max-h-[750px] object-contain transition-transform duration-300 group-hover:scale-[1.008]"
+                  />
+                  <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="bg-slate-950/80 text-white text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-sm border border-slate-700 flex items-center gap-2 shadow-2xl">
+                      <ZoomIn className="w-4 h-4 text-indigo-400" />
+                      클릭하여 고화질 확대 뷰어로 보기
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center p-8 max-w-md">
+                  <FileImage className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                  <h4 className="font-bold text-white text-base mb-1">
+                    인포그래픽 다이어그램을 기본으로 지원합니다
+                  </h4>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                    웹사이트에 모든 내용이 고해상도 다이어그램으로 기본 탑재되어 있으며, GitHub의 `public/` 디렉터리에 `{OVERVIEW_IMAGE_NAME}` 원본 파일을 넣으시면 이 탭에서 원본 스캔본도 바로 확인하실 수 있습니다.
+                  </p>
+                  <button
+                    onClick={() => setViewTab('poster')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>개요 다이어그램으로 보기</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Grid of 7 Grades Cards */}
@@ -127,7 +176,7 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
             학년별 핵심 요약 카드
           </h3>
           <p className="text-xs text-slate-500">
-            각 학년 카드를 클릭하시면 해당 학년의 원본 인포그래픽과 20차시 전체 세부 계획을 확인하실 수 있습니다.
+            각 학년 카드를 클릭하시면 해당 학년의 전체 인포그래픽과 20차시 세부 계획을 확인하실 수 있습니다.
           </p>
         </div>
 

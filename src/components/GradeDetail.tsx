@@ -28,7 +28,10 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
   onOpenLightbox,
   onOpenUploadModal,
 }) => {
-  const [viewMode, setViewMode] = useState<'image' | 'interactive'>('image');
+  // Default to interactive diagram so content is IMMEDIATELY visible without requiring any file upload!
+  const [viewMode, setViewMode] = useState<'image' | 'interactive'>(
+    loadedImageSrc ? 'image' : 'interactive'
+  );
   const [lessonFilter, setLessonFilter] = useState<'all' | '기개발' | '신규' | '흡수'>('all');
 
   const filteredLessons = curriculum.lessons?.filter(l => {
@@ -95,17 +98,6 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
       <div className="flex items-center justify-between flex-wrap gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
         <div className="flex items-center gap-1.5">
           <button
-            onClick={() => setViewMode('image')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              viewMode === 'image'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-            }`}
-          >
-            <FileImage className="w-4 h-4" />
-            <span>원본 인포그래픽 PNG 뷰어</span>
-          </button>
-          <button
             onClick={() => setViewMode('interactive')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               viewMode === 'interactive'
@@ -115,6 +107,20 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
           >
             <Layers className="w-4 h-4" />
             <span>인터랙티브 웹 다이어그램</span>
+          </button>
+          <button
+            onClick={() => setViewMode('image')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              viewMode === 'image'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            <FileImage className="w-4 h-4" />
+            <span>원본 PNG 스캔 뷰어</span>
+            {loadedImageSrc && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+            )}
           </button>
         </div>
 
@@ -130,7 +136,7 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
           )}
           <button
             onClick={onOpenUploadModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition-colors"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>파일 관리</span>
@@ -138,12 +144,21 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
         </div>
       </div>
 
-      {/* Mode 1: Image View */}
+      {/* Mode 1: Interactive Vector Diagram View (Default, 100% available without upload) */}
+      {viewMode === 'interactive' && (
+        <InteractiveVectorDiagram
+          curriculum={curriculum}
+          onOpenLightbox={onOpenLightbox}
+          hasUploadedImage={!!loadedImageSrc}
+        />
+      )}
+
+      {/* Mode 2: Original Image View */}
       {viewMode === 'image' && (
         <div className="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-xl border border-slate-800 text-white">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
               <h3 className="font-bold text-sm sm:text-base">
                 {curriculum.grade} 인공지능 윤리교육 흐름도 원본 인포그래픽
               </h3>
@@ -161,19 +176,10 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
                   <ZoomIn className="w-3.5 h-3.5" />
                   <span>클릭하여 확대 / 전체화면</span>
                 </button>
-              ) : (
-                <button
-                  onClick={onOpenUploadModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium rounded-xl transition-colors"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  <span>{curriculum.imageFileName} 파일 등록</span>
-                </button>
-              )}
+              ) : null}
             </div>
           </div>
 
-          {/* Actual Image Render or Interactive Fallback */}
           <div className="rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center p-2 relative group min-h-[400px]">
             {loadedImageSrc ? (
               <div
@@ -194,43 +200,34 @@ export const GradeDetail: React.FC<GradeDetailProps> = ({
               </div>
             ) : (
               <div className="text-center p-8 max-w-lg">
-                <div className="w-16 h-16 rounded-2xl bg-indigo-900/60 text-indigo-300 flex items-center justify-center mx-auto mb-4 border border-indigo-700/50">
-                  <FileImage className="w-8 h-8" />
+                <div className="w-14 h-14 rounded-2xl bg-indigo-900/60 text-indigo-300 flex items-center justify-center mx-auto mb-4 border border-indigo-700/50">
+                  <FileImage className="w-7 h-7" />
                 </div>
                 <h4 className="text-base font-bold text-white mb-2">
-                  {curriculum.imageFileName} 원본 파일 연결 대기 중
+                  인터랙티브 웹 다이어그램으로 모든 내용을 보실 수 있습니다
                 </h4>
                 <p className="text-xs text-slate-400 leading-relaxed mb-6">
-                  첨부된 `{curriculum.imageFileName}` 파일을 등록하시면 원본 인쇄용 고해상도 인포그래픽을 직접 확인하실 수 있습니다. 아래 버튼을 통해 파일을 드래그하여 등록하거나, 즉시 인터랙티브 다이어그램으로 열람하실 수 있습니다.
+                  웹사이트에 {curriculum.grade}의 4단계 성장 흐름, 20차시 계획, 기개발 자료 8종, 핵심 질문 및 산출물이 이미 완벽하게 탑재되어 있습니다. GitHub의 `public/` 디렉터리에 `{curriculum.imageFileName}` 파일을 넣으시면 이 탭에서 원본 스캔본도 바로 열람하실 수 있습니다.
                 </p>
                 <div className="flex items-center justify-center gap-3">
                   <button
-                    onClick={onOpenUploadModal}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-md flex items-center gap-2"
+                    onClick={() => setViewMode('interactive')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2"
                   >
-                    <Upload className="w-4 h-4" />
-                    <span>파일 업로드 및 연결</span>
+                    <Layers className="w-4 h-4" />
+                    <span>웹 다이어그램 보기</span>
                   </button>
                   <button
-                    onClick={() => setViewMode('interactive')}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-colors border border-slate-700"
+                    onClick={onOpenUploadModal}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition-colors border border-slate-700"
                   >
-                    웹 다이어그램 보기
+                    파일 관리
                   </button>
                 </div>
               </div>
             )}
           </div>
         </div>
-      )}
-
-      {/* Mode 2: Interactive Vector Diagram View */}
-      {viewMode === 'interactive' && (
-        <InteractiveVectorDiagram
-          curriculum={curriculum}
-          onOpenLightbox={onOpenLightbox}
-          hasUploadedImage={!!loadedImageSrc}
-        />
       )}
 
       {/* 4-Step Process Breakdown Cards */}

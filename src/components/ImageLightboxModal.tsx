@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ZoomIn, ZoomOut, RotateCcw, Download, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
-import { curriculumData } from '../data/curriculumData';
+import { curriculumData, OVERVIEW_IMAGE_NAME } from '../data/curriculumData';
+import { InteractiveVectorDiagram } from './InteractiveVectorDiagram';
+import { OverviewPoster } from './OverviewPoster';
 
 interface ImageLightboxModalProps {
   isOpen: boolean;
@@ -33,7 +35,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
       setScale(1);
       setPosition({ x: 0, y: 0 });
     }
-  }, [isOpen, imageSrc]);
+  }, [isOpen, imageSrc, imageFileName]);
 
   // Handle ESC key and arrow keys
   useEffect(() => {
@@ -97,6 +99,10 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
     document.body.removeChild(a);
   };
 
+  const currentGradeData = currentGradeId
+    ? curriculumData.find(c => c.id === currentGradeId)
+    : null;
+
   return (
     <div
       role="dialog"
@@ -117,32 +123,34 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
 
         {/* Toolbar */}
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
-            <button
-              onClick={handleZoomOut}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
-              title="축소 (Zoom Out)"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </button>
-            <span className="text-xs font-mono px-2 text-slate-300 tabular-nums">
-              {Math.round(scale * 100)}%
-            </span>
-            <button
-              onClick={handleZoomIn}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
-              title="확대 (Zoom In)"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleReset}
-              className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors ml-1 border-l border-slate-700 pl-2"
-              title="초기화 (100%)"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {imageSrc && (
+            <div className="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+              <button
+                onClick={handleZoomOut}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                title="축소 (Zoom Out)"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-mono px-2 text-slate-300 tabular-nums">
+                {Math.round(scale * 100)}%
+              </span>
+              <button
+                onClick={handleZoomIn}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors"
+                title="확대 (Zoom In)"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleReset}
+                className="p-1.5 text-slate-300 hover:text-white hover:bg-slate-700 rounded transition-colors ml-1 border-l border-slate-700 pl-2"
+                title="초기화 (100%)"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {imageSrc && (
             <button
@@ -172,8 +180,8 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        className={`relative flex-1 overflow-hidden flex items-center justify-center p-4 ${
-          scale > 1 ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
+        className={`relative flex-1 overflow-auto flex items-center justify-center p-4 ${
+          scale > 1 && imageSrc ? 'cursor-grab active:cursor-grabbing' : 'cursor-default'
         }`}
       >
         {imageSrc ? (
@@ -188,12 +196,24 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
             className="max-w-full max-h-[85vh] object-contain select-none rounded-lg shadow-2xl"
           />
         ) : (
-          <div className="text-center p-8 bg-slate-900 border border-slate-800 rounded-2xl max-w-md text-white">
-            <Maximize2 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-            <p className="font-bold text-lg mb-1">{imageFileName}</p>
-            <p className="text-sm text-slate-400 leading-relaxed">
-              이미지 파일이 아직 로드되지 않았습니다. 상단의 '원본 파일 연결' 메뉴를 통해 PNG 파일을 드래그하여 등록해주세요.
-            </p>
+          <div className="w-full max-w-5xl my-auto p-4 text-slate-900">
+            {imageFileName === OVERVIEW_IMAGE_NAME ? (
+              <OverviewPoster onSelectGrade={id => onSelectGrade && onSelectGrade(id)} />
+            ) : currentGradeData ? (
+              <InteractiveVectorDiagram
+                curriculum={currentGradeData}
+                onOpenLightbox={() => {}}
+                hasUploadedImage={false}
+              />
+            ) : (
+              <div className="text-center p-8 bg-slate-900 border border-slate-800 rounded-2xl max-w-md mx-auto text-white">
+                <Maximize2 className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <p className="font-bold text-lg mb-1">{imageFileName}</p>
+                <p className="text-sm text-slate-400 leading-relaxed">
+                  인포그래픽 정보가 로드되었습니다.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -202,14 +222,14 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
           <>
             <button
               onClick={() => navigateGrade(-1)}
-              className="absolute left-6 top-1/2 -translate-y-1/2 p-3 bg-slate-900/80 hover:bg-slate-800 text-white rounded-full border border-slate-700 shadow-xl transition-all hover:scale-105"
+              className="fixed left-6 top-1/2 -translate-y-1/2 p-3 bg-slate-900/90 hover:bg-slate-800 text-white rounded-full border border-slate-700 shadow-xl transition-all hover:scale-105 z-20"
               title="이전 학년 (←)"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               onClick={() => navigateGrade(1)}
-              className="absolute right-6 top-1/2 -translate-y-1/2 p-3 bg-slate-900/80 hover:bg-slate-800 text-white rounded-full border border-slate-700 shadow-xl transition-all hover:scale-105"
+              className="fixed right-6 top-1/2 -translate-y-1/2 p-3 bg-slate-900/90 hover:bg-slate-800 text-white rounded-full border border-slate-700 shadow-xl transition-all hover:scale-105 z-20"
               title="다음 학년 (→)"
             >
               <ChevronRight className="w-6 h-6" />
@@ -220,7 +240,7 @@ export const ImageLightboxModal: React.FC<ImageLightboxModalProps> = ({
 
       {/* Bottom Hint */}
       <div className="px-6 py-2.5 bg-slate-900/90 border-t border-slate-800 text-center text-xs text-slate-400">
-        <span>마우스 휠/버튼으로 확대 후 드래그하여 이동할 수 있습니다. 키보드 방향키(← / →)로 학년 간 이동이 가능합니다.</span>
+        <span>키보드 방향키(← / →)로 학년간 이동할 수 있으며, ESC 키로 닫을 수 있습니다.</span>
       </div>
     </div>
   );

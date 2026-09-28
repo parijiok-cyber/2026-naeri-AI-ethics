@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight, Maximize2, FileText, Layers, ZoomIn } from 'lucide-react';
 import { curriculumData, OVERVIEW_IMAGE_NAME } from '../data/curriculumData';
+import { OverviewPoster } from './OverviewPoster';
+import { InteractiveVectorDiagram } from './InteractiveVectorDiagram';
 
 interface PresentationModeProps {
   isOpen: boolean;
@@ -139,13 +141,8 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     }
                   />
                 ) : (
-                  <div className="text-center p-8">
-                    <p className="font-bold text-lg mb-2">
-                      {OVERVIEW_IMAGE_NAME} 연결 안내
-                    </p>
-                    <p className="text-sm text-slate-400">
-                      상단 '원본 PNG' 메뉴에서 해당 파일을 등록하시면 슬라이드에 즉시 고화질로 반영됩니다.
-                    </p>
+                  <div className="w-full text-slate-800">
+                    <OverviewPoster onSelectGrade={() => {}} />
                   </div>
                 )}
               </div>
@@ -223,16 +220,12 @@ export const PresentationMode: React.FC<PresentationModeProps> = ({
                     }
                   />
                 ) : (
-                  <div className="text-center p-8 max-w-md">
-                    <p className="font-bold text-base mb-1">
-                      {currentGrade.imageFileName} 이미지
-                    </p>
-                    <p className="text-xs text-slate-400 mb-4">
-                      {currentGrade.description}
-                    </p>
-                    <div className="p-3 bg-slate-800/80 rounded-xl text-xs text-indigo-300 font-semibold text-left">
-                      💡 핵심 질문: {currentGrade.coreQuestion}
-                    </div>
+                  <div className="w-full text-slate-800">
+                    <InteractiveVectorDiagram
+                      curriculum={currentGrade}
+                      onOpenLightbox={() => {}}
+                      hasUploadedImage={false}
+                    />
                   </div>
                 )}
               </div>

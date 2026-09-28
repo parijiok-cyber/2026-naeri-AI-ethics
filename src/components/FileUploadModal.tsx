@@ -112,11 +112,11 @@ export const FileUploadModal: React.FC<FileUploadModalProps> = ({
               <div>
                 <p className="text-sm font-bold text-slate-900">
                   {connectedCount === 8
-                    ? '8종 원본 인포그래픽 파일이 모두 연결되어 있습니다'
-                    : `현재 ${connectedCount}개의 원본 파일이 등록되었습니다`}
+                    ? '8종 원본 인포그래픽 파일이 모두 준비되어 있습니다'
+                    : `현재 ${connectedCount}개의 파일이 로컬에 등록되었습니다`}
                 </p>
                 <p className="text-xs text-indigo-700">
-                  컴퓨터에 저장된 PNG 파일을 아래 영역으로 끌어다 놓으세요.
+                  웹사이트에 8종 다이어그램이 기본 탑재되어 있으며, GitHub 저장소의 `public/` 폴더에 원본 PNG를 넣으시면 영구 반영됩니다.
                 </p>
               </div>
             </div>
