@@ -16,7 +16,7 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
   onSelectGrade,
   onOpenUploadModal,
 }) => {
-  const [viewTab, setViewTab] = useState<'poster' | 'image'>(overviewImageSrc ? 'image' : 'poster');
+  const [viewTab, setViewTab] = useState<'poster' | 'image'>('poster');
 
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
@@ -147,21 +147,19 @@ export const OverviewGrid: React.FC<OverviewGridProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="text-center p-8 max-w-md">
-                  <FileImage className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-                  <h4 className="font-bold text-white text-base mb-1">
-                    인포그래픽 다이어그램을 기본으로 지원합니다
-                  </h4>
-                  <p className="text-xs text-slate-400 leading-relaxed mb-4">
-                    웹사이트에 모든 내용이 고해상도 다이어그램으로 기본 탑재되어 있으며, GitHub의 `public/` 디렉터리에 `{OVERVIEW_IMAGE_NAME}` 원본 파일을 넣으시면 이 탭에서 원본 스캔본도 바로 확인하실 수 있습니다.
-                  </p>
-                  <button
-                    onClick={() => setViewTab('poster')}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-md inline-flex items-center gap-2"
-                  >
-                    <Layers className="w-3.5 h-3.5" />
-                    <span>개요 다이어그램으로 보기</span>
-                  </button>
+                <div className="w-full p-2 sm:p-4 text-slate-900">
+                  <div className="mb-3 px-3 py-2 bg-indigo-950/80 border border-indigo-700/60 rounded-xl text-xs text-indigo-200 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      ✨ 고해상도 벡터 인포그래픽 개요도를 표시 중입니다.
+                    </span>
+                    <button
+                      onClick={onOpenUploadModal}
+                      className="text-[11px] underline text-indigo-300 hover:text-white"
+                    >
+                      사용자 파일 교체
+                    </button>
+                  </div>
+                  <OverviewPoster onSelectGrade={onSelectGrade} />
                 </div>
               )}
             </div>

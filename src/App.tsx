@@ -46,20 +46,13 @@ export default function App() {
           }
         }
 
-        // Try checking if file exists in /public
+        // Try checking if real file exists in /public (must be 200 OK and an image)
         try {
-          let res = await fetch(`/${encodeURIComponent(name)}`, { method: 'HEAD' });
-          if (!res.ok) {
-            res = await fetch(`/${name}`, { method: 'HEAD' });
-          }
-          if (res.ok && (res.headers.get('content-type')?.includes('image') || res.status === 200)) {
+          const res = await fetch(`/${encodeURIComponent(name)}`, { method: 'HEAD' });
+          if (res.ok && res.status === 200 && res.headers.get('content-type')?.includes('image')) {
             loaded[name] = `/${encodeURIComponent(name)}`;
-            continue;
           }
         } catch {}
-
-        // Fallback: If in public directory, set the public path directly
-        loaded[name] = `/${encodeURIComponent(name)}`;
       }
       setLoadedImages(loaded);
     }
